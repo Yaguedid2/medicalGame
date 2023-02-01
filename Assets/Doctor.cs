@@ -170,4 +170,19 @@ public class Doctor : MonoBehaviour
     {
         tasks[taskName] = true;
     }
+
+
+    public void askAboutAge()
+    {
+        StartCoroutine(askAge());
+    }
+    IEnumerator askAge()
+    {
+        GameObject client=GameManager.instance.Client;
+        Vector3 destination = new Vector3(client.transform.position.x - 1, transform.position.y, client.transform.position.z + 1);
+        navMeshAgent.destination = destination;
+        while (!checkIfStoped())
+            yield return new WaitForEndOfFrame();
+        SpeachManager.instance.speak(gameObject, "What s your age ?");
+    }
 }

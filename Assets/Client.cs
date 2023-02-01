@@ -8,7 +8,7 @@ public class Client : MonoBehaviour
 {
     Animator animator;
     NavMeshAgent navMeshAgent;
-    public Transform patientChair,scale,heightScale,tensionScale,thiknessScale;
+     Transform patientChair,scale,heightScale,tensionScale,thiknessScale;
   
     public bool sitDown = false;
     public bool scaleYouself = false;
@@ -20,6 +20,7 @@ public class Client : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        initiateRefs();
         SpeachManager.instance.speak(gameObject, "Hello !!");
     }
 
@@ -117,5 +118,14 @@ public class Client : MonoBehaviour
             return true;
         return false;
     }
-   
+   void initiateRefs()
+    {
+        patientChair = GameObject.Find("patienChairRef").transform;
+       
+        scale = GameObject.Find("scaleRef").transform;
+        heightScale= GameObject.Find("heightRef").transform;
+        tensionScale= GameObject.Find("tensionRef").transform;
+        thiknessScale= GameObject.Find("thiknesRef").transform;
+
+    }
 }

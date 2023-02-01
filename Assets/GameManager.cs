@@ -9,10 +9,13 @@ public class GameManager : MonoBehaviour
 {
     Camera cam;
     public TextMeshProUGUI objectTitle;
+    public Transform spawnPosition;
     Animator playerAnimator;
     public NavMeshAgent player;
     public static GameManager instance;
-    bool inventoryDisplayed = false; 
+    bool inventoryDisplayed = false;
+    public GameObject Client;
+    public List<GameObject> listOfClients = new List<GameObject>();
     private void Awake()
     {
         instance = this;
@@ -22,6 +25,7 @@ public class GameManager : MonoBehaviour
         cam = Camera.main;
         objectTitle.gameObject.SetActive(false);
         playerAnimator = player.GetComponent<Animator>();
+        instantianteClient();
     }
 
     // Update is called once per frame
@@ -124,4 +128,10 @@ public class GameManager : MonoBehaviour
     {
         inventoryDisplayed = false;
     }
+    public void instantianteClient()
+    {
+        Client = Instantiate(listOfClients[0]);
+        Client.transform.position = spawnPosition.position;
+    }
+
 }

@@ -18235,8 +18235,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c69ad3b7398070b408c36a2760e9b857, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  patientChair: {fileID: 0}
+  patientChair: {fileID: 215368596361118288, guid: f7e84b66e75e1c34fb3ae6cdca8d8e44,
+    type: 3}
+  scale: {fileID: 1686096842194316652, guid: 4c7ef4282c0245a489a6d22be33076f1, type: 3}
+  heightScale: {fileID: 5304270873278552925, guid: 44590965ba0452945bbacf113894a00d,
+    type: 3}
+  tensionScale: {fileID: 3725499625024762247, guid: ea00387f5baeccd4cb276c663cabb22a,
+    type: 3}
+  thiknessScale: {fileID: 1802407479006660518, guid: 1d7643916da6bbd4383114fd01ec6325,
+    type: 3}
   sitDown: 0
+  scaleYouself: 0
+  heightScaleYouself: 0
+  tensionScaleYouself: 0
+  thiknessScaleYourself: 0
 --- !u!195 &2018952036
 NavMeshAgent:
   m_ObjectHideFlags: 0
