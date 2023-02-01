@@ -9,7 +9,7 @@ public class Client : MonoBehaviour
     Animator animator;
     NavMeshAgent navMeshAgent;
      Transform patientChair,scale,heightScale,tensionScale,thiknessScale;
-  
+    public bool Male = false;
     public bool sitDown = false;
     public bool scaleYouself = false;
     public bool heightScaleYouself = false;
@@ -18,10 +18,12 @@ public class Client : MonoBehaviour
 
     void Start()
     {
+        transform.rotation = Quaternion.Euler(0, -180, 0);
         animator = GetComponent<Animator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
         initiateRefs();
-        SpeachManager.instance.speak(gameObject, "Hello !!");
+        StartCoroutine(_Enter());
+       
     }
 
     // Update is called once per frame
@@ -109,6 +111,26 @@ public class Client : MonoBehaviour
         animator.Play("layHand");
         transform.rotation = Quaternion.Euler(0, 62.197f, 0);
     }
+    IEnumerator _Enter()
+    {
+     
+
+
+        animator.Play("walk");
+        navMeshAgent.destination = GameManager.instance.clientStandingPoint.position;
+
+        while (Vector3.Distance(transform.position, GameManager.instance.clientStandingPoint.position) > 1f)
+            yield return new WaitForEndOfFrame();
+        animator.Play("talk");
+        transform.LookAt(Doctor.instance.transform);
+        SpeachManager.instance.speak(gameObject, "Hello !!");
+      
+        yield return new WaitForSeconds(2f);
+        Doctor.instance.sayHello();
+        yield return new WaitForSeconds(2f);
+        sitDown = true;
+    }
+
 
     bool checkIfStoped()
     {
@@ -120,12 +142,28 @@ public class Client : MonoBehaviour
     }
    void initiateRefs()
     {
-        patientChair = GameObject.Find("patienChairRef").transform;
        
-        scale = GameObject.Find("scaleRef").transform;
-        heightScale= GameObject.Find("heightRef").transform;
-        tensionScale= GameObject.Find("tensionRef").transform;
-        thiknessScale= GameObject.Find("thiknesRef").transform;
-
+       
+        scale = GameManager.instance.scale;
+        heightScale= GameManager.instance.heightScale;
+        tensionScale= GameManager.instance.tensionScale;
+        thiknessScale= GameManager.instance.thiknessScale;
+        patientChair = GameManager.instance.patientChair;
+    }
+    public int answerAge()
+    {
+       int age= UnityEngine.Random.Range(18, 70);
+        transform.LookAt(Doctor.instance.transform);
+        string response = "I Have " + age + "years old";
+        SpeachManager.instance.speak(gameObject,response);
+        return age;
+    }
+    public int answerPregnancy()
+    {
+        int pregnancyCount = UnityEngine.Random.Range(0, 5);
+        transform.LookAt(Doctor.instance.transform);
+        string response = "I Have been pregnant " + pregnancyCount + " times";
+        SpeachManager.instance.speak(gameObject, response);
+        return pregnancyCount;
     }
 }

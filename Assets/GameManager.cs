@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.AI;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,6 +17,12 @@ public class GameManager : MonoBehaviour
     bool inventoryDisplayed = false;
     public GameObject Client;
     public List<GameObject> listOfClients = new List<GameObject>();
+    public Transform patientChair, scale, heightScale, tensionScale, thiknessScale,clientStandingPoint,telescope;
+    public GameObject scaleFigure,heightScaleFigure,thiknessFigure,tensionFigure;
+    public TextMeshPro scaleText,heightScaleText,thiknessScaleText,tensionScaleText;
+    public GameObject resultPanel,whichMeans,supervisor,youPassedText,youFailedText,ReportPanel;
+    public TextMeshProUGUI yourEstimationText,aiEstimationText;
+    public Camera endSceneCamera;
     private void Awake()
     {
         instance = this;
@@ -130,8 +137,68 @@ public class GameManager : MonoBehaviour
     }
     public void instantianteClient()
     {
-        Client = Instantiate(listOfClients[0]);
+        Client = Instantiate(listOfClients[UnityEngine.Random.Range(0,listOfClients.Count)]);
         Client.transform.position = spawnPosition.position;
+    }
+
+    public bool PlayerDecision_willHaveDiabets = false;
+
+    public void takeDecision(bool willHaveDiabetes)
+    {
+        PlayerDecision_willHaveDiabets = willHaveDiabetes;
+        StartCoroutine(_showResult());
+    }
+    bool win = false;
+    float perc;
+    public void showResult(string result)
+    {
+        Debug.Log(result);
+        result =result.Substring(1,4);
+
+        result=result.Replace(".", ",");
+         perc=float.Parse(result)*100;
+        Debug.Log(perc);
+       
+
+    }
+    IEnumerator _showResult()
+    {
+        resultPanel.SetActive(true);
+        ReportPanel.SetActive(false);
+        if (PlayerDecision_willHaveDiabets)
+            yourEstimationText.text = "Has diabetes";
+        else
+            yourEstimationText.text = "Don't Have diabetes";
+        yield return new WaitForSeconds(2f);
+        aiEstimationText.text = "There is a pourcentage of " + perc + " % That the client has diabetes";
+        if (perc < 50)
+            if (PlayerDecision_willHaveDiabets)
+                win = false;
+            else
+                win = true;
+        else
+             if (PlayerDecision_willHaveDiabets)
+            win = true;
+        else
+            win = false;
+
+        yield return new WaitForSeconds(2f);
+        whichMeans.SetActive(true);
+        yield return new WaitForSeconds(1.5f);
+        whichMeans.SetActive(false);
+        resultPanel.SetActive(false);
+        endSceneCamera.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        if(win)
+        {
+            supervisor.GetComponent<Animator>().Play("rightAnswer");
+            youPassedText.SetActive(true);
+        }
+        else
+        {
+            supervisor.GetComponent<Animator>().Play("wrongAnswer");
+            youFailedText.SetActive(true);
+        }
     }
 
 }
