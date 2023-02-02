@@ -58,9 +58,12 @@ public class Doctor : MonoBehaviour
         {
 
             onetime = false;
+          
             if (checkTasks())
             {
+                
                 animator.SetBool("idle", true);
+                transform.LookAt(GameManager.instance.Client.transform);
                 amIdle = true;
                 GameManager.instance.alreadyInQuest = false;
             }
@@ -71,6 +74,7 @@ public class Doctor : MonoBehaviour
         else if (!checkIfStoped())
         {
             onetime = true;
+            transform.LookAt(navMeshAgent.destination);
             animator.SetBool("idle", false);
         }
     }
@@ -87,7 +91,8 @@ public class Doctor : MonoBehaviour
   
     public void addItemToPocket(GameObject item)
     {
-        tasks["takeElement"] = true;
+     
+       
         int itemCount = 1;
         transform.LookAt(item.transform);
         GameObject invenItem;
@@ -124,11 +129,14 @@ public class Doctor : MonoBehaviour
                 }
            
         }
-     
-        item.SetActive(false);
-        
+        itemToPutInPocket = item;
+        tasks["takeElement"] = true;
+        checkTasks();
+      
+        StartCoroutine(GoBackToPlace());
     }
-    GameObject itemToRemove = null;
+    GameObject itemToRemove = null,itemToPutInPocket=null;
+    
     public void returnBackElement(TextMeshProUGUI ElementName)
     {
         //searchForThe element
@@ -160,34 +168,44 @@ public class Doctor : MonoBehaviour
             itemCount--;
             ivenItem.GetComponentsInChildren<TextMeshProUGUI>()[1].text = itemCount.ToString();
         }
-         
+        StartCoroutine(GoBackToPlace());
 
-       
+    }
+    IEnumerator GoBackToPlace()
+    {
+        yield return new WaitForSeconds(2f);
+        tasks["GoToStandPoint"] = true;
+        checkTasks();
+
+
     }
     bool checkTasks()
     {
         foreach (string task in tasks.Keys)
             if (tasks[task] == true)
             {
-                doTask(task);
+              StartCoroutine(doTask(task));
                 return false;
             }
         return true;
     }
-    void doTask(string taskName)
+    IEnumerator doTask(string taskName)
     {
         switch(taskName)
         {
-            case "takeElement": animator.Play("layHand");break;
-            case "putElement": transform.LookAt(itemToRemove.transform); animator.Play("layHand"); itemToRemove.SetActive(true); break;
-
+            case "takeElement": animator.Play("layHand");yield return new WaitForSeconds(0.8f); itemToPutInPocket.SetActive(false); tasks[taskName] = false; break;
+            case "putElement": transform.LookAt(itemToRemove.transform); animator.Play("layHand"); itemToRemove.SetActive(true); tasks[taskName] = false; break;
+            case "laboratory": animator.Play("layHandInsuline");  break;
+            case "GoToStandPoint": animator.Play("walk");  navMeshAgent.destination = GameManager.instance.DoctorStandPoint.position; if(checkIfStoped()) tasks[taskName] = false; break;
         }
-        tasks[taskName] = false;
+      
     }
     void setupTasks()
     {
         tasks.Add("takeElement", false);
         tasks.Add("putElement", false);
+        tasks.Add("laboratory", false);
+        tasks.Add("GoToStandPoint", false);
     }
     public void addTask(string taskName)
     {
@@ -249,7 +267,9 @@ public class Doctor : MonoBehaviour
         GameObject client = GameManager.instance.Client;
         SpeachManager.instance.speak(gameObject, "Can you Go to the scale please ?");
         yield return new WaitForSeconds(2f);
+        StartCoroutine(GameManager.instance.showCamWall(2f));
         client.GetComponent<Client>().scaleYouself = true;
+        StartCoroutine(GameManager.instance.hideCamWall(2f));
         clientScale = UnityEngine.Random.Range(40, 150);
         TextMeshPro scaleText = GameManager.instance.scaleText;
 
@@ -283,7 +303,9 @@ public class Doctor : MonoBehaviour
         client.GetComponent<Client>().heightScaleYouself = true;
         clientHeightScale = UnityEngine.Random.Range(150, 220);
         yield return new WaitForSeconds(2f);
+        StartCoroutine(GameManager.instance.showCamWall(2f));
         GameManager.instance.heightScaleFigure.SetActive(true);
+        StartCoroutine(GameManager.instance.hideCamWall(2f));
         yield return new WaitForSeconds(2f);
         TextMeshPro heightScaleText = GameManager.instance.heightScaleText;
         heightScaleText.text = clientHeightScale.ToString();
@@ -306,7 +328,9 @@ public class Doctor : MonoBehaviour
         GameObject client = GameManager.instance.Client;
         SpeachManager.instance.speak(gameObject, "Can you Go to thickness scale ?");
         yield return new WaitForSeconds(2f);
+        StartCoroutine(GameManager.instance.showCamWall(2f));
         client.GetComponent<Client>().thiknessScaleYourself = true;
+        StartCoroutine(GameManager.instance.hideCamWall(1f));
         clientThiknessScale = UnityEngine.Random.Range(10, 40);
         yield return new WaitForSeconds(2f);
         GameManager.instance.thiknessFigure.SetActive(true);
@@ -332,7 +356,9 @@ public class Doctor : MonoBehaviour
         GameObject client = GameManager.instance.Client;
         SpeachManager.instance.speak(gameObject, "Can you Go to blood pressure scale ?");
         yield return new WaitForSeconds(2f);
+        StartCoroutine(GameManager.instance.showCamWall(4f));
         client.GetComponent<Client>().tensionScaleYouself = true;
+        StartCoroutine(GameManager.instance.hideCamWall(4f));
         int rand = UnityEngine.Random.Range(0, 10);
         if(rand>7)
              clientBloodPressureScale = UnityEngine.Random.Range(90, 120);
@@ -370,15 +396,26 @@ public class Doctor : MonoBehaviour
         
             animator.Play("layHandInsuline");
             yield return new WaitForSeconds(3f);
+            StartCoroutine(GameManager.instance.showCamWall(4f));
             animator.Play("walk");
             destination = GameManager.instance.telescope.transform.position;
             navMeshAgent.destination = destination;
             while (Vector3.Distance(transform.position, destination) > 3)
                 yield return new WaitForEndOfFrame();
-          
+
+            tasks["laboratory"] = true;
             insulineInHand.SetActive(false);
-            animator.Play("layHandInsuline");
-            yield return new WaitForSeconds(3f);
+            transform.LookAt(GameManager.instance.telescope.transform);
+           
+            yield return new WaitForSeconds(5f);
+            tasks["laboratory"] = false;
+            animator.Play("walk");
+            destination = GameManager.instance.clientStandingPoint.position;
+            navMeshAgent.destination = destination;
+            while (Vector3.Distance(transform.position, destination) > 1)
+                yield return new WaitForEndOfFrame();
+            StartCoroutine(GameManager.instance.hideCamWall(0f));
+            transform.LookAt(GameManager.instance.Client.transform);
             animator.Play("idle");
             removeElementFromInventory("Diabete Meter");
             int rand = UnityEngine.Random.Range(0, 10);
@@ -419,15 +456,28 @@ public class Doctor : MonoBehaviour
 
             animator.Play("layHandInsuline");
             yield return new WaitForSeconds(3f);
+            StartCoroutine(GameManager.instance.showCamWall(4f));
             animator.Play("walk");
             destination = GameManager.instance.telescope.transform.position;
             navMeshAgent.destination = destination;
             while (Vector3.Distance(transform.position, destination) > 3)
                 yield return new WaitForEndOfFrame();
 
+          
+            tasks["laboratory"] = true;
             smallTubeInHand.SetActive(false);
-            animator.Play("layHandInsuline");
-            yield return new WaitForSeconds(3f);
+            transform.LookAt(GameManager.instance.telescope.transform);
+
+            yield return new WaitForSeconds(5f);
+            StartCoroutine(GameManager.instance.hideCamWall(0f));
+            tasks["laboratory"] = false;
+            animator.Play("walk");
+            destination = GameManager.instance.clientStandingPoint.position;
+            navMeshAgent.destination = destination;
+            while (Vector3.Distance(transform.position, destination) > 1)
+                yield return new WaitForEndOfFrame();
+            StartCoroutine(GameManager.instance.hideCamWall(0f));
+            transform.LookAt(GameManager.instance.Client.transform);
             animator.Play("idle");
             removeElementFromInventory("Small Tube");
             clientGlucoseScale = UnityEngine.Random.Range(88, 200);

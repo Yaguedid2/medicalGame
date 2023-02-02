@@ -14,15 +14,16 @@ public class GameManager : MonoBehaviour
     Animator playerAnimator;
     public NavMeshAgent player;
     public static GameManager instance;
-    bool inventoryDisplayed = false;
+   public  bool inventoryDisplayed = false;
     public GameObject Client;
     public List<GameObject> listOfClients = new List<GameObject>();
-    public Transform patientChair, scale, heightScale, tensionScale, thiknessScale,clientStandingPoint,telescope;
+    public Transform patientChair, scale, heightScale, tensionScale, thiknessScale,clientStandingPoint,telescope,DoctorStandPoint;
     public GameObject scaleFigure,heightScaleFigure,thiknessFigure,tensionFigure;
     public TextMeshPro scaleText,heightScaleText,thiknessScaleText,tensionScaleText;
     public GameObject resultPanel,whichMeans,supervisor,youPassedText,youFailedText,ReportPanel;
     public TextMeshProUGUI yourEstimationText,aiEstimationText;
     public Camera endSceneCamera;
+    public GameObject camWall,canvas;
     private void Awake()
     {
         instance = this;
@@ -54,7 +55,7 @@ public class GameManager : MonoBehaviour
         if (onSpot != null)
         {
            
-            if (onSpot.GetComponent<SelectableObject>() != null)
+            if (onSpot.GetComponent<SelectableObject>() != null && onSpot.GetComponent<SelectableObject>().takable)
             {
                 StartCoroutine(startQuest(onSpot));
             }
@@ -104,7 +105,7 @@ public class GameManager : MonoBehaviour
     {
         alreadyInQuest = true;
         Vector3 actualPosition = player.transform.position;
-        Vector3 destination = new Vector3(objectToBehaveOn.transform.position.x, actualPosition.y, objectToBehaveOn.transform.position.z);
+        Vector3 destination = objectToBehaveOn.transform.position;
        
        
             player.destination = destination;
@@ -137,8 +138,15 @@ public class GameManager : MonoBehaviour
     }
     public void instantianteClient()
     {
-        Client = Instantiate(listOfClients[UnityEngine.Random.Range(0,listOfClients.Count)]);
+        StartCoroutine(_instantianteClient());
+    }
+    IEnumerator _instantianteClient()
+    {
+        StartCoroutine(showCamWall(4));
+        Client = Instantiate(listOfClients[UnityEngine.Random.Range(0, listOfClients.Count)]);
         Client.transform.position = spawnPosition.position;
+        StartCoroutine(hideCamWall(4));
+        yield return new WaitForEndOfFrame();
     }
 
     public bool PlayerDecision_willHaveDiabets = false;
@@ -163,6 +171,7 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator _showResult()
     {
+        yield return new WaitForSeconds(5f);
         resultPanel.SetActive(true);
         ReportPanel.SetActive(false);
         if (PlayerDecision_willHaveDiabets)
@@ -199,6 +208,20 @@ public class GameManager : MonoBehaviour
             supervisor.GetComponent<Animator>().Play("wrongAnswer");
             youFailedText.SetActive(true);
         }
+    }
+
+    public IEnumerator showCamWall(float time)
+    {
+      
+        canvas.SetActive(false);
+        camWall.SetActive(true);
+        yield return new WaitForSeconds(time);
+    }
+    public IEnumerator hideCamWall(float time)
+    {
+        yield return new WaitForSeconds(time);
+        canvas.SetActive(true) ;
+        camWall.SetActive(false);
     }
 
 }

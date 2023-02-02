@@ -113,8 +113,8 @@ public class Client : MonoBehaviour
     }
     IEnumerator _Enter()
     {
-     
 
+        yield return new WaitForSeconds(2f);
 
         animator.Play("walk");
         navMeshAgent.destination = GameManager.instance.clientStandingPoint.position;

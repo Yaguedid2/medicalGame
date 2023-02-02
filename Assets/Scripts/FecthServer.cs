@@ -11,7 +11,7 @@ public class FecthServer : MonoBehaviour
    
     public static FecthServer instance;
  
-    public static string ip = "192.168.11.104";
+    public static string ip = "192.168.1.171";
    
    
     private void Awake()
